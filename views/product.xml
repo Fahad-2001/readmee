@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="product_view_form_inherited" model="ir.ui.view">
+        <field name="name">product.product.view</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="hr_expense.product_product_expense_form_view" />
+        <field name="arch" type="xml">
+            <field name="standard_price" position="before">
+                <field name="is_an_opd"/>
+                <field name="is_limit_applicable" attrs="{'invisible': [('is_an_opd', '=', False)]}"/>
+                <field name="opd_type" attrs="{'invisible': [('is_an_opd', '=', False)]}" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+            </field>
+        </field>
+    </record>
+</odoo>

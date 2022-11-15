@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_rayn_opd,rayn_opd.rayn_opd,model_rayn_opd,base.group_user,1,1,1,1
+access_opd_type,rayn_opd.opd_type,model_opd_type,base.group_user,1,1,1,1
+access_rayn_opd_line,rayn_opd.rayn_opd_line,model_rayn_opd_line,base.group_user,1,1,1,1
+access_opd_payment_register,rayn_opd.access_opd_payment_register,model_opd_payment_register,base.group_user,1,1,1,1

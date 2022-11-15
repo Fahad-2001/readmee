@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <template id="rayn_payslip_report">
+            <t t-call="web.html_container">
+                <!--                <t t-call="web.internal_layout">-->
+                <t t-foreach="docs" t-as="o">
+                    <t t-call="rayn_payslip.rayn_payslip_header_id"/>
+
+                    <!--                        <t t-call="web.external_layout">-->
+
+                    <br/>
+
+
+
+                    <div class="page">
+<!--                        <style>-->
+<!--                            table {-->
+<!--                            border: 2px solid black;-->
+<!--                            border-collapse: collapse;-->
+<!--                            padding-left:10px;-->
+<!--                            }-->
+
+<!--                        </style>-->
+                        <table style=" border: 2px solid black ;margin-left: 30px;" width="45%">
+                            <thead>
+                                <tbody>
+                                    <tr>
+                                        <td width="30%">
+                                          <b> <span t-field="o.employee_id"/></b>
+                                        </td>
+                                        <br/>
+                                        <td style="text-align:right; color:white" width="30">.</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:right; color:white" width="30">.</td>
+                                        <td style="text-align:right; color:white" width="30">.</td>
+                                    </tr>
+                                    <tr>
+                                        <td width="30%">CNIC</td>
+                                        <td style="text-align:right" width="30">
+                                              <span t-field="o.employee_id.identification_id"/></td>
+
+<!--                                        <span t-esc="request.env.user.employee_ids.identification_id"/>-->
+
+                                    </tr>
+                                    <tr>
+                                        <td width="30%">Pay Period</td>
+                                        <td style="text-align:right" width="50%">
+                                            <span t-field="o.date_from"/>,
+                                            <span t-field="o.date_to"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td width="30%">Pay Date</td>
+                                        <td style="text-align:right" width="30%">12, March,2020</td>
+                                    </tr>
+                                </tbody>
+                            </thead>
+                        </table>
+                        <br/>
+                        <table style="border:none;" width="80%">
+                            <thead>
+                                <tr style=" height: 50px;">
+                                    <th colspan="3"
+                                        style="padding-left:10px; text-align:left; color:white; background-color:#11538c">
+                                        Pay
+                                        Period
+                                        Earning
+                                        ( <span t-field="o.date_from"/>,
+                                            <span t-field="o.date_to"/>)
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <t t-set="total" t-value="0"/>
+                                <t t-set="totals" t-value="0"/>
+
+                                <t t-foreach="o.line_ids" t-as="line">
+
+                                    <tr>
+                                        <t t-if="line.salary_rule_id.appears_on_payslip == true">
+                                            <t t-if="line.salary_rule_id.section == 'pay_earing'">
+                                                <!--                                                <t t-set="total" t-value="total + line.total"/>-->
+                                                <td style="padding-left: 30px">
+                                                    <span t-field="line.name"/>
+                                                </td>
+                                                <td style="width: 150px; text-align: left; padding-left: 30px">PKR</td>
+                                                <td style="width: 150px; text-align: center; padding-right: 30px">
+                                                    <span t-field="line.total"
+                                                          t-options='{"widget": "integer", "precision": 2}'/>
+                                                </td>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <tr>
+                                </tr>
+<!--                                <tr>-->
+<!--                                    <td style="padding-left: 30px"></td>-->
+<!--                                    <td style="width: 150px; border-bottom: 2px solid black; text-align: left; padding-left: 30px">-->
+<!--                                    </td>-->
+<!--                                    <td style="width: 150px; border-bottom: 2px solid black; text-align: center; padding-right: 30px">-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+                                <!--                                <tr>-->
+                                <!--                                    <td style="padding-left: 30px">Take-Home Earnings</td>-->
+                                <!--                                    <td style="width: 150px; text-align: left; padding-left: 30px">-->
+                                <!--                                        <b>PKR</b>-->
+                                <!--                                    </td>-->
+                                <!--                                    <td style="width: 150px; text-align: center; padding-right: 30px">-->
+                                <!--                                        <b>-->
+                                <!--                                            <t t-esc="total" t-options='{"widget": "integer", "precision": 2}'/>-->
+                                <!--                                        </b>-->
+                                <!--                                    </td>-->
+                                <!--                                </tr>-->
+                            </tbody>
+                        </table>
+                        <br/>
+                        <br/>
+
+                        <table style="border:none;" width="80%">
+                            <thead>
+                                <tr style=" height: 50px;">
+                                    <th colspan="3"
+                                        style="padding-left:10px;  text-align:left; color:white; background-color:#11538c">
+                                        Pay
+                                        Year-to-Date Earnings
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                <t t-foreach="o.line_ids" t-as="line">
+                                    <tr>
+                                        <t t-if="line.salary_rule_id.appears_on_payslip == true">
+                                            <t t-if="line.salary_rule_id.section == 'pay_year_to_date'">
+                                                <!--                                                <t t-set="totals" t-value="totals + line.total"/>-->
+                                                <td style="padding-left: 30px">
+                                                    <span t-field="line.name"/>
+                                                </td>
+                                                <td style="width: 150px; text-align: left; padding-left: 30px">PKR</td>
+                                                <td style="width: 150px; text-align: center; padding-right: 30px">
+                                                    <span t-field="line.total"
+                                                          t-options='{"widget": "integer", "precision": 2}'/>
+                                                </td>
+                                            </t>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <tr>
+                                </tr>
+<!--                                <tr>-->
+<!--                                    <td style="padding-left: 30px"></td>-->
+<!--                                    <td style="width: 150px; border-bottom: 2px solid black; text-align: left; padding-left: 30px">-->
+<!--                                    </td>-->
+<!--                                    <td style="width: 150px; border-bottom: 2px solid black; text-align: center; padding-right: 30px">-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+                                <!--                                <tr>-->
+                                <!--                                    <td style="padding-left: 30px">Take-Home Earnings</td>-->
+                                <!--                                    <td style="width: 150px; text-align: left; padding-left: 30px">-->
+                                <!--                                        <b>PKR</b>-->
+                                <!--                                    </td>-->
+                                <!--                                    <td style="width: 150px; text-align: center; padding-right: 30px">-->
+                                <!--                                        <b>-->
+                                <!--                                            <t t-esc="totals" t-options='{"widget": "integer", "precision": 2}'/>-->
+                                <!--                                        </b>-->
+                                <!--                                    </td>-->
+                                <!--                                </tr>-->
+                            </tbody>
+                        </table>
+
+                    </div>
+                </t>
+                <!--                    </t>-->
+            </t>
+            <!--            </t>-->
+        </template>
+
+
+    </data>
+</odoo>

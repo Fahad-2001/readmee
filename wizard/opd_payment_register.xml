@@ -1,0 +1,72 @@
+<odoo>
+    <data>
+
+        <record id="wizard_opd_payment_register_form" model="ir.ui.view">
+            <field name="name">opd.payment.register.form</field>
+            <field name="model">opd.payment.register</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="journal_id"
+                                   options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="payment_method_line_id"
+                                   options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            <field name="partner_bank_id"
+                                   attrs="{'invisible': [('payment_method_line_id','=','Checks')]}"
+                                   options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                        </group>
+                        <group>
+                            <label for="total_amount" string="Total"/>
+                            <div class="o_row">
+                                <field name="total_amount" widget="monetary"
+                                       options="{'currency_field': 'currency_id'}"/>
+                                <field name="currency_id" groups="base.group_multi_currency"
+                                       options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                            </div>
+                            <field name="payment_date"/>
+                            <field name="communication"/>
+                            <!--                            <field name="amount"/>-->
+                        </group>
+
+                        <!--########################################### attrs="{'invisible': [('payment_difference', '=', 0.0)]}"-->
+                        <group name="group3"
+                               attrs="{'invisible': [('payment_difference', '=', 0.0)]}"
+                               groups="account.group_account_readonly">
+                            <label for="payment_difference"/>
+                            <div>
+                                <field name="payment_difference"/>
+                                <field name="payment_difference_handling" widget="radio" nolabel="1"/>
+                                <div attrs="{'invisible': [('payment_difference_handling','=','open')]}">
+                                    <label for="writeoff_account_id" string="Post Difference In" class="oe_edit_only"/>
+                                    <field name="writeoff_account_id"
+                                           string="Post Difference In"
+                                           options="{'no_create': True}"
+                                           attrs="{'required': [('payment_difference_handling', '=', 'reconcile')]}"/>
+                                    <label for="writeoff_label" class="oe_edit_only" string="Label"/>
+                                    <field name="writeoff_label"
+                                           attrs="{'required': [('payment_difference_handling', '=', 'reconcile')]}"/>
+                                </div>
+                            </div>
+                        </group>
+                        <!--###########################################-->
+                    </group>
+                    <footer>
+                        <button name="action_create_opd_payments" string="Create Payment" type="object"
+                                class="btn-primary"/>
+                        <button special="cancel" data-hotkey="z" string="Cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_wizard_opd_payment_register" model="ir.actions.act_window">
+            <field name="name">OPD Payment Register</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">opd.payment.register</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+    </data>
+</odoo>

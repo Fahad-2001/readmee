@@ -1,0 +1,38 @@
+<odoo>
+
+    <template id="rayn_payslip_header_id">
+        <t t-set="company" t-value="user.company_id"/>
+        <table style="border:none;" width="80%">
+            <thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img t-if="company.logo" t-att-src="image_data_uri(company.logo)"  style="height:45px;width:120px"/>
+<!--                            <img src="rayn_payslip/static/src/img/rayalog.png"/>-->
+                            <p>Plot# 110, Street # 8 Sector I-10/3,
+                                <br/>
+                                Industrial Area Islamabad 44000
+                                <br/>
+                                Pakistan
+                            </p>
+
+                        </td>
+                        <td>
+                            <h5>
+                                <span style="color:#11538c">Earnings Statement
+                                </span>
+                                <br/>
+                                <span style="font-weight:lighter">
+                                    Stub Number:
+                                </span>
+                                <b>
+                                    <span t-field="o.number"/>
+                                </b>
+                            </h5>
+                        </td>
+                    </tr>
+                </tbody>
+            </thead>
+        </table>
+    </template>
+</odoo>

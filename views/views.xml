@@ -1,0 +1,326 @@
+<odoo>
+    <data>
+        <record id="rayn_opd_view_form" model="ir.ui.view">
+            <field name="name">rayn_opd_view_form</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <form string="OPD Form">
+                    <header>
+                        <field name="state" widget="statusbar" default="Draft"
+                               statusbar_visible="Draft,Submitted,Approved,Posted,Done" clickable="1"/>
+                        <button name="action_submit" string="Submit" class="oe_highlight"
+                                type="object" states="Draft"/>
+                        <button name="action_approve" string="Approve" class="oe_highlight"
+                                type="object" states="Submitted"/>
+                        <button name="action_reject" string="Reject" class="oe_highlight" type="object"
+                                attrs="{'invisible':[('state','!=','Approved')]}"/>
+                        <button name="action_draft" string="Reset to Draft" class="oe_highlight" type="object"
+                                attrs="{'invisible':[('state','!=','Rejected')]}"/>
+                        <button name="post_journal_entries" string="Post Journal Entries" class="oe_highlight"
+                                type="object" attrs="{'invisible': [('state', '!=', 'Approved')]}"/>
+                        <button string="Register Payment" type="action" class="oe_highlight"
+                                name="%(rayn_opd.action_wizard_opd_payment_register)d"
+                                attrs="{'invisible': [('state', '!=', 'Posted')]}"
+                                context="{'default_total_amount': total_amount, 'default_communication': name, 'default_employee_id': employee_id}"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_open_account_move" class="oe_stat_button" icon="fa-file-text-o"
+                                    type="object" attrs="{'invisible': [('state', '!=', 'Posted')]}"
+                                    groups="account.group_account_invoice,account.group_account_readonly">
+                                Journal Entry
+                            </button>
+                            <field name="account_move_id" invisible="1"/>
+                        </div>
+                        <!--PAYMENT STATE NEWLY ADDED-->
+                        <field name="payment_state" invisible="True"/>
+                        <widget name="web_ribbon" title="Paid" bg_color="bg-success"
+                                attrs="{'invisible': [('state', '!=', 'Done')]}"/>
+                        <!--PAYMENT STATE NEWLY ADDED END-->
+                        <div class="oe_title mb24">
+                            <div>
+                                <h1>
+                                    <field name="name" placeholder="e.g. Root Canal/Scaling" default_focus="1"/>
+                                </h1>
+                            </div>
+                        </div>
+                        <group>
+                            <group>
+                                <!--<field name="amount_residual" widget="monetary" force_save="1"/>-->
+                                <field name="employee_id" groups="hr_expense.group_hr_expense_team_approver"
+                                       context="{'default_company_id': company_id}"
+                                       options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"
+                                       widget="many2one_avatar_employee"/>
+                                <field name="project_id"
+                                       options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                                <field name="analytic_account_id" options="{'no_open': True, 'no_create': True}"/>
+                                <field name="analytic_tag_ids" widget="many2many_tags"
+                                       groups="analytic.group_analytic_tags"/>
+                                <field name="expense_for" required="1" widget="radio" options="{'horizontal': true}"/>
+                                <!--<field name="remaining_balance" force_save="1"/>-->
+                                <field name="product_id" force_save="1" invisible="1"/>
+                                <field name="unit_amount" required="1" force_save="1" widget="monetary"
+                                       options="{'currency_field': 'currency_id', 'field_digits': True}" invisible="1"/>
+                                <!--INVISIBLE FROM HERE-->
+                                <label for="total_amount" string="Total" force_save="1" invisible="1"/>
+                                <div class="o_row">
+                                    <field name="total_amount" widget="monetary" invisible="1"
+                                           options="{'currency_field': 'currency_id'}" force_save="1"/>
+                                    <field name="currency_id"
+                                           options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"
+                                           groups="base.group_multi_currency" invisible="1"/>
+                                </div>
+                            </group>
+                            <group>
+                                <field name="company_id"
+                                       options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"
+                                       groups="base.group_multi_company"/>
+                                <field name="journal_id"
+                                       options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}"/>
+                                <field name="bill_date"/>
+                                <field name="reference"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="OPD Expense Lines" name="opd_expense_lines">
+                                <field name="expense_line_ids">
+                                    <tree editable="bottom">
+                                        <field name="product_id" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True,}" required="1"/>
+                                        <field name="opd_type" string="OPD Type" options="{'no_quick_create':True,'no_create_edit':True,'no_open': True}"/>
+                                        <field name="account_id"/>
+                                        <field name="spouse_name"
+                                               attrs="{'column_invisible':[('parent.expense_for','!=','Spouse')]}"/>
+                                        <field name="dependant_id"
+                                               attrs="{'column_invisible':[('parent.expense_for','!=','Children')]}"/>
+                                        <field name="prescription" string="Prescription" required="1"/>
+                                        <field name="bill" string="Bill" required="1"/>
+                                        <field name="amount"/>
+                                    </tree>
+                                    <form>
+                                        <group>
+                                            <field name="product_id" required="1"/>
+                                            <field name="spouse_name"/>
+                                            <field name="opd_type"/>
+                                            <field name="amount"/>
+                                            <field name="dependant_id"/>
+                                        </group>
+                                    </form>
+                                </field>
+                                <group class="oe_subtotal_footer oe_right" colspan="2" name="expense_total">
+                                    <div class="oe_subtotal_footer_separator oe_inline o_td_label">
+                                        <label for="total_amount"/>
+                                    </div>
+                                    <field name="total_amount" string="Total Amount" nolabel="1" force_save="1"
+                                           class="oe_subtotal_footer_separator"/>
+                                    <!--                                    <field name="amount_residual" force_save="1" class="oe_subtotal_footer_separator"-->
+                                    <!--                                    attrs="{'invisible': [('state', 'not in', ('Posted', 'Done'))]}"/>-->
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="o_attachment_preview"/>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids" widget="mail_followers"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids" widget="mail_thread"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <record id="rayn_opd_view_tree" model="ir.ui.view">
+            <field name="name">Rayn OPD Tree</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <tree string="rayn_opd_tree" sample="1"
+                      decoration-info="state == 'Draft'"
+                      decoration-warning="state == 'Submitted'"
+                      decoration-success="state in ('Approved','Posted','Done')"
+                      decoration-danger="state == 'Rejected'">
+                    <field name="bill_date" string="OPD Expense Date" optional="show"/>
+                    <field name="id" optional="show"/>
+                    <!--<field name="employee_id.product_id" optional="show"/>-->
+                    <field name="name" string="Description" optional="show"/>
+                    <field name="employee_id" optional="show"/>
+                    <field name="activity_ids" string="Next Activity" widget="list_activity" optional="show"/>
+                    <field name="analytic_account_id" optional="show"/>
+                    <field name="total_amount" string="Total Amount" optional="show"/>
+                    <field name="company_id" groups="base.group_multi_company" optional="show"/>
+                    <field name="state" widget="badge"
+                           decoration-info="state == 'Draft'"
+                           decoration-warning="state == 'Submitted'"
+                           decoration-success="state in ('Approved','Posted','Done')"
+                           decoration-danger="state == 'Rejected'" string="Status" optional="show"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- KANBAN VIEW-->
+        <record id="rayn_opd_expenses_analysis_kanban" model="ir.ui.view">
+            <field name="name">rayn.opd.kanban</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile" sample="1" js_class="hr_expense_kanban">
+                    <field name="name"/>
+                    <field name="employee_id"/>
+                    <field name="total_amount"/>
+                    <field name="bill_date"/>
+                    <field name="state"/>
+                    <field name="currency_id"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <strong class="o_kanban_record_title">
+                                            <span>
+                                                <t t-esc="record.name.value"/>
+                                            </span>
+                                        </strong>
+                                        <strong class="o_kanban_record_subtitle float-right">
+                                            <span class="text-right">
+                                                <field name="total_amount" widget="monetary"/>
+                                            </span>
+                                        </strong>
+                                    </div>
+                                </div>
+                                <div class="row mt8">
+                                    <div class="col-6 text-muted">
+                                        <span>
+                                            <t t-esc="record.employee_id.value"/>
+                                            <t t-esc="record.bill_date.value"/>
+                                        </span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="float-right text-right">
+                                            <field name="state" widget="label_selection"
+                                                   options="{'classes': {'Draft': 'primary', 'Submitted': 'warning', 'Rejected': 'danger', 'Approved': 'success'}}"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- GRAPH VIEW -->
+        <record id="rayn_opd_view_graph" model="ir.ui.view">
+            <field name="name">rayn.opd.graph</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <graph string="OPD Expenses Analysis" sample="1">
+                    <field name="bill_date"/>
+                    <field name="employee_id"/>
+                    <field name="total_amount" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- PIVOT VIEW-->
+        <record id="view_rayn_opd_pivot" model="ir.ui.view">
+            <field name="name">rayn.opd.pivot</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <pivot string="OPD Expenses Analysis" sample="1">
+                    <field name="employee_id" type="row"/>
+                    <field name="product_id" type="row"/>
+                    <field name="bill_date" interval="month" type="col"/>
+                    <field name="total_amount" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- ACTIVITY VIEW-->
+        <record id="rayn_opd_view_activity" model="ir.ui.view">
+            <field name="name">rayn.opd.activity</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <activity string="OPD Expenses">
+                    <field name="employee_id"/>
+                    <field name="currency_id"/>
+                    <templates>
+                        <div t-name="activity-box">
+                            <img t-att-src="activity_image('hr.employee', 'avatar_128', record.employee_id.raw_value)"
+                                 t-att-title="record.employee_id.value" t-att-alt="record.employee_id.value"/>
+                            <div>
+                                <field name="name" display="full"/>
+                                <field name="total_amount" widget="monetary" muted="1" display="full"/>
+                                <field name="state" display="right"/>
+                            </div>
+                        </div>
+                    </templates>
+                </activity>
+            </field>
+        </record>
+
+        <record id="rayn_opd_view_search" model="ir.ui.view">
+            <field name="name">rayn.opd.search.view</field>
+            <field name="model">rayn.opd</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="employee_id" filter_domain="[('employee_id', 'ilike', self)]"/>
+                    <field name="product_id" filter_domain="[('product_id', 'ilike', self)]"/>
+                    <field name="analytic_account_id" filter_domain="[('analytic_account_id', 'ilike', self)]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" name="group_by_employee_id" context="{'group_by':'employee_id'}"/>
+                        <filter string="Product" name="group_by_product_id" context="{'group_by':'product_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- NEW ACTION FOR REPORTING-->
+        <record id="rayn_opd_actions_all" model="ir.actions.act_window">
+            <field name="name">OPD Expenses Analysis</field>
+            <field name="res_model">rayn.opd</field>
+            <field name="view_mode">graph,pivot,tree,kanban,form</field>
+            <field name="search_view_id" ref="rayn_opd_view_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_empty_folder">
+                    No data yet!
+                </p>
+                <p>
+                    Create new expenses to get statistics.
+                </p>
+            </field>
+        </record>
+
+        <record id="rayn_opd_action" model="ir.actions.act_window">
+            <field name="name">OPD Claim</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">rayn.opd</field>
+            <field name="view_mode">tree,form,kanban,graph,pivot,activity</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">
+                    Create your first OPD!
+                </p>
+            </field>
+        </record>
+
+        <!-- This Menu Item must have a parent and an action -->
+        <menuitem id="rayn_opd_root_menu_id"
+                  web_icon="rayn_opd,static/description/opd.jpg"
+                  name="OPD"
+                  sequence="5"/>
+
+        <menuitem id="rayn_opd_id"
+                  name="OPD Claim"
+                  parent="rayn_opd_root_menu_id"
+                  action="rayn_opd_action"
+                  sequence="1"/>
+
+        <menuitem id="rayn_opd_reporting_id"
+                  name="Reporting"
+                  parent="rayn_opd_root_menu_id"
+                  sequence="2"/>
+
+        <menuitem id="rayn_opd_report_analysis_id"
+                  name="OPD Expenses Analysis"
+                  parent="rayn_opd_reporting_id"
+                  action="rayn_opd_actions_all"
+                  sequence="2"/>
+
+    </data>
+</odoo>
